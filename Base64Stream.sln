@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32228.343
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Base64Stream", "Base64Stream\Base64Stream.csproj", "{53BF8A3C-F687-4401-BD91-15611BA2B696}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base64Stream.Test", "Base64Stream.Test\Base64Stream.Test.csproj", "{07CACB7E-5796-4520-A1D5-9D33E8C43E0B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53BF8A3C-F687-4401-BD91-15611BA2B696}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53BF8A3C-F687-4401-BD91-15611BA2B696}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53BF8A3C-F687-4401-BD91-15611BA2B696}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53BF8A3C-F687-4401-BD91-15611BA2B696}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07CACB7E-5796-4520-A1D5-9D33E8C43E0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07CACB7E-5796-4520-A1D5-9D33E8C43E0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07CACB7E-5796-4520-A1D5-9D33E8C43E0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07CACB7E-5796-4520-A1D5-9D33E8C43E0B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1296BC2E-7995-4595-B5E7-EC2C27B59DFE}
+	EndGlobalSection
+EndGlobal
