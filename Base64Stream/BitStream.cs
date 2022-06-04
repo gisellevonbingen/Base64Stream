@@ -14,15 +14,14 @@ namespace Base64Stream
 
         private int ReadingByte = 0;
         private int ReadingPosition = -1;
-        private int ReadingOffset = 0;
         private int ReadingLength = 0;
         private int WritingByte = 0;
         private int WritingPosition = 0;
 
-        public long InBits { get; private set; }
-        public long InBytes { get; private set; }
-        public long OutBits { get; private set; }
-        public long OutBytes { get; private set; }
+        public long InBits { get; protected set; }
+        public long InBytes { get; protected set; }
+        public long OutBits { get; protected set; }
+        public long OutBytes { get; protected set; }
 
         public BitStream(Stream baseStream) : this(baseStream, false)
         {
@@ -35,16 +34,20 @@ namespace Base64Stream
             this.LeaveOpen = leaveOpen;
         }
 
-        protected virtual int ReadEncodedByte(out int offset, out int length)
+        protected virtual int ReadEncodedByte(out int length)
         {
-            offset = 0;
             length = 8;
+            return this.ReadEncodedByte();
+        }
+
+        protected virtual int ReadEncodedByte()
+        {
             return this.BaseStream.ReadByte();
         }
 
-        protected virtual bool WriteEncodedByte(byte value, int position, bool disposing)
+        protected virtual bool TryWriteEncodedByte(byte value, int position, bool disposing)
         {
-            if (position == 8 || disposing == true)
+            if (position == 8 | disposing == true)
             {
                 this.BaseStream.WriteByte(value);
                 return true;
@@ -60,9 +63,8 @@ namespace Base64Stream
         {
             if (this.ReadingPosition == -1 || this.ReadingPosition == this.ReadingLength)
             {
-                this.ReadingByte = this.ReadEncodedByte(out var offset, out var length);
+                this.ReadingByte = this.ReadEncodedByte(out var length);
                 this.ReadingPosition = 0;
-                this.ReadingOffset = offset;
                 this.ReadingLength = length;
             }
 
@@ -71,7 +73,7 @@ namespace Base64Stream
                 return -1;
             }
 
-            var shift = 7 - (this.ReadingOffset + this.ReadingPosition);
+            var shift = 7 - this.ReadingPosition;
             var bitMask = 1 << shift;
             var bit = (this.ReadingByte & bitMask) >> shift;
             this.ReadingPosition++;
@@ -93,9 +95,11 @@ namespace Base64Stream
                     return bit;
                 }
 
-                value = value << 1 | bit;
+                var shift = 7 - i;
+                value |= bit << shift;
             }
 
+            this.InBytes++;
             return value;
         }
 
@@ -120,11 +124,12 @@ namespace Base64Stream
 
         public void WriteBit(int bit)
         {
-            this.WritingByte = (this.WritingByte << 1) | bit;
+            var shift = 7 - this.WritingPosition;
+            this.WritingByte |= bit << shift;
             this.WritingPosition++;
             this.OutBits++;
 
-            if (this.WriteEncodedByte((byte)this.WritingByte, this.WritingPosition, false) == true)
+            if (this.TryWriteEncodedByte((byte)this.WritingByte, this.WritingPosition, false) == true)
             {
                 this.WritingByte = 0;
                 this.WritingPosition = 0;
@@ -160,7 +165,8 @@ namespace Base64Stream
 
             if (this.WritingPosition > 0)
             {
-                this.WriteEncodedByte((byte)this.WritingByte, this.WritingPosition, true);
+                this.TryWriteEncodedByte((byte)this.WritingByte, this.WritingPosition, true);
+                this.WritingPosition = 0;
             }
 
             if (this.LeaveOpen == false)

@@ -11,6 +11,7 @@ namespace Base64Stream
     {
         public const byte Pad = (byte)'=';
         public const byte BitsInChar = 6;
+        public const byte BitsOffset = 8 - BitsInChar;
 
         private static IEnumerable<char> FromTo(char start, char end)
         {
@@ -58,7 +59,7 @@ namespace Base64Stream
 
         }
 
-        protected override int ReadEncodedByte(out int offset, out int length)
+        protected override int ReadEncodedByte(out int length)
         {
             if (this.Peek == -1)
             {
@@ -66,14 +67,13 @@ namespace Base64Stream
 
                 if (value == -1)
                 {
-                    offset = 0;
                     length = 0;
                     return -1;
                 }
                 else
                 {
                     this.Peek = value;
-                    return this.ReadEncodedByte(out offset, out length);
+                    return this.ReadEncodedByte(out length);
                 }
 
             }
@@ -90,32 +90,31 @@ namespace Base64Stream
                 else
                 {
                     this.Peek = value;
-                    offset = 8 - BitsInChar;
                     length = BitsInChar - l;
-                    return DecodeMap[(char)prev];
+                    return DecodeMap[(char)prev] << BitsOffset;
                 }
 
             }
 
         }
 
-        protected override bool WriteEncodedByte(byte value, int position, bool disposing)
+        protected override bool TryWriteEncodedByte(byte value, int position, bool disposing)
         {
-            if (disposing == true)
+            if (position == BitsInChar || disposing == true)
             {
-                var remain = BitsInChar - position;
-                this.BaseStream.WriteByte((byte)EncodeMap[(byte)(value << remain)]);
+                this.BaseStream.WriteByte((byte)EncodeMap[(byte)(value >> BitsOffset)]);
 
-                for (var i = 0; i < remain / 2; i++)
+                if (disposing == true)
                 {
-                    base.BaseStream.WriteByte(Pad);
+                    var remain = BitsInChar - position;
+
+                    for (var i = 0; i < remain / 2; i++)
+                    {
+                        this.BaseStream.WriteByte(Pad);
+                    }
+
                 }
 
-                return true;
-            }
-            else if (position == BitsInChar)
-            {
-                this.BaseStream.WriteByte((byte)EncodeMap[value]);
                 return true;
             }
             else
